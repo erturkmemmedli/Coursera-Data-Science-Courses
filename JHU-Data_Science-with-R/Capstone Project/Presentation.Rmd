@@ -1,0 +1,37 @@
+---
+title: "Text Prediction"
+author: "Arturk Mammadli"
+date: "1/30/2021"
+output: ioslides_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+The objective of the Final Project is to build a predictive model to recommend the next word for given input phrase.
+
+Drawing from a English text from Blogs, Newsn and Twitter, a Shiny application is built where the output is a prediction of the next word. 
+
+The model was built using R and developed into a Shiny application running on shinyapps.io (https://erturkmemmedli.shinyapps.io/Capstone/).
+
+
+
+## Cleaning and Processing Text
+
+I have used the following steps to clean and process the data:
+
+First, I removed lines with non-English words
+Second, I used the samples of Blogs, News, and Twitter and merged them into one file
+Third, I removed double, white spaces, URLs, profanity, numeric characters, and panctuation. 
+
+## APP User Guide
+
+Shiny app that takes as input a phrases (words) in a text box input and outputs a prediction of the next word. You can enter the phrase, then you can copy-paste predicted word to the phrase, it will continue to predict. After a few step, you can see a sentence formed by predictive approach.
+
+## APP Funcionality
+
+Data is taken from the csv files to load information in a fractional way. The user enters the text in the textbox. Application will go through quadrigram (4-grams) to find a match. If match is not found, proceed to the trigram (3-gram) and so on.

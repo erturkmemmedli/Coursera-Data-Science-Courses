@@ -1,0 +1,12 @@
+name: Presentation
+title: Presentation
+username:
+account: erturkmemmedli
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3550729
+bundleId: 4160535
+url: https://erturkmemmedli.shinyapps.io/Presentation/
+when: 1612005063.40766
+asMultiple: FALSE
+asStatic: FALSE

@@ -1,0 +1,174 @@
+---
+title: "Practical Machine Learning Predictions Project"
+author: "Arturk Mammadli"
+date: "1/26/2021"
+output: 
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+The goal of this project is to predict the manner in which the exercise presented in the first paragraph was done. It is presented a report describing a proposed model, using cross validation, also is proposed a expected out of sample error. Also the prediction model is used to predict 20 different test cases. 
+
+Subjects were asked to perform barbell lifts correctly and incorrectly in 5 different ways:
+
+*   Exactly according to the specification (Class A)
+*   Throwing the elbows to the front (Class B) - mistake
+*   Lifting the dumbbell only halfway (Class C) - mistake
+*   Lowering the dumbbell only halfway (Class D) - mistake
+*   Throwing the hips to the front (Class E) - mistake
+
+## Setup
+
+Due to size of the training sample (19622 observations and up to 60 variables), parallel processing was selected for model development
+
+```{r}
+library(caret)
+library(randomForest)
+library(e1071)
+set.seed(1603)
+```
+
+Create a model to predict the manner in which the subjects did the exercise using the accelerometer data as predictors.
+The outcome to be predicted is the “classe” variable.
+
+```{r}
+trainingFilename   <- 'pml-training.csv'
+quizFilename       <- 'pml-testing.csv'
+```
+
+## Data Cleansing
+
+On inspection in Excel, found NA,#DIV/0! and blank values in the data. These are not valid observed values, so remove with na.strings parameter.
+
+```{r}
+training.df     <-read.csv(trainingFilename, na.strings=c("NA","","#DIV/0!"))
+training.df     <-training.df[,colSums(is.na(training.df)) == 0]
+dim(training.df)
+```
+
+```{r}
+quiz.df         <-read.csv(quizFilename , na.strings=c("NA", "", "#DIV/0!"))
+quiz.df         <-quiz.df[,colSums(is.na(quiz.df)) == 0]
+dim(quiz.df) #;head(quiz.df,3)
+```
+
+## Features
+Reduce the number of variables
+
+Remove the non-predictors from the training set. This includes the index, subject name, time and window variables.
+
+```{r}
+Training.df   <-training.df[,-c(1:7)]
+Quiz.df <-quiz.df[,-c(1:7)]
+dim(Training.df)
+```
+
+Check for near zero values in training data
+
+```{r}
+Training.nzv<-nzv(Training.df[,-ncol(Training.df)],saveMetrics=TRUE)
+rownames(Training.nzv)
+dim(Training.nzv)[1]
+```
+
+## Algorithm
+
+Partition the training data into a training set and a testing/validation set
+
+```{r}
+inTrain     <- createDataPartition(Training.df$classe, p = 0.6, list = FALSE)
+inTraining  <- Training.df[inTrain,]
+inTest      <- Training.df[-inTrain,]
+dim(inTraining);dim(inTest)
+```
+
+Construct the model using cross validation or reload using the cached model
+
+Cross Validation achieved with trainControl method set to “cv”
+
+```{r}
+myModelFilename <- "myModel.RData"
+if (!file.exists(myModelFilename)) {
+
+    library(doParallel)
+    ncores <- makeCluster(detectCores() - 1)
+    registerDoParallel(cores=ncores)
+    getDoParWorkers() # 3    
+    
+    # use Random Forest method with Cross Validation, 4 folds
+    myModel <- train(classe ~ .
+                , data = inTraining
+                , method = "rf"
+                , metric = "Accuracy"  # categorical outcome variable so choose accuracy
+                , preProcess=c("center", "scale") # attempt to improve accuracy by normalizing
+                , trControl=trainControl(method = "cv"
+                                        , number = 4 # folds of the training data
+                                        , p= 0.60
+                                        , allowParallel = TRUE 
+#                                       , seeds=NA
+                                        )
+                )
+
+    save(myModel, file = "myModel.RData")
+   
+    stopCluster(ncores)
+} else {
+     
+    load(file = myModelFilename, verbose = TRUE)
+}
+```
+
+
+```{r}
+print(myModel, digits=4)
+```
+## Predict
+
+Predicting the activity performed using the training file derived test subset
+
+```{r}
+predTest <- predict(myModel, newdata=inTest)
+```
+
+## Evaluation
+
+## Test
+
+Check the accuracy of the model by comparing the predictions to the actual results
+
+```{r}
+confusionMatrix(predTest, as.factor(inTest$classe))
+```
+
+
+## Out of Sample Error
+
+The out-of-sample error of 0.0019 or 0.19%.
+
+Accuracy is very high, at 0.9981, and this figure lies within the 95% confidence interval.
+Final Model data and important predictors in the model
+
+```{r}
+myModel$finalModel
+```
+
+```{r}
+varImp(myModel)
+```
+
+27 variables were tried at each split and the reported OOB Estimated Error is a low 0.83%.
+
+Overall we have sufficient confidence in the prediction model to predict classe for the 20 quiz/test cases.
+Validation/Quiz
+
+The accuracy of the model by predicting with the Validation/Quiz set supplied in the test file.
+
+```{r}
+print(predict(myModel, newdata=Quiz.df))
+```
