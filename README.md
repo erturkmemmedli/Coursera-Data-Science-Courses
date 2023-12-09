@@ -10,4 +10,4 @@ This repository includes some documents and solutions from some of the courses I
 - [Machine Learning](https://www.coursera.org/account/accomplishments/certificate/XB7CVHE3PKGN)
 - [Exploratory Data Analysis for Machine Learning](https://www.coursera.org/account/accomplishments/certificate/73E7WMBFW7QV)
 - [AWS Fundamentals: Going Cloud-Native](https://www.coursera.org/account/accomplishments/certificate/HWP7MM33FPG7)
-- [Mathematics for Machine Learning and Data Science](https://www.coursera.org/account/accomplishments/specialization/certificate/PDUUDUQBT88P)
+- [Mathematics for Machine Learning and Data Science Specialization](https://www.coursera.org/account/accomplishments/specialization/certificate/PDUUDUQBT88P)
